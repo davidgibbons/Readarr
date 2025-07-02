@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  readarr-metadata:
+    build: .
+    ports:
+      - "8787:8787"
+    environment:
+      - FLASK_ENV=production
+    restart: unless-stopped
+    volumes:
+      - ./cache:/app/cache  # Optional: for persistent caching
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8787/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
