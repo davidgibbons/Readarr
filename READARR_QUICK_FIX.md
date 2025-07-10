@@ -1,20 +1,32 @@
 # Readarr Quick Fix Guide
 
-This guide will get your Readarr instance working again by replacing the broken metadata service with a simple Goodreads scraper.
+This guide will get your Readarr instance working again by replacing the broken metadata service with a robust multi-source system.
 
 ## 🚀 Quick Start (5 minutes)
 
-### Step 1: Start the Metadata Service
+### Option 1: Use rreading-glasses (Recommended - No Setup Required)
+
+**This is now the default!** Readarr has been updated to use the rreading-glasses service (api.bookinfo.pro) as the default metadata source. Simply:
+
+1. **Update Readarr** to the latest version
+2. **No configuration needed** - it will work automatically
+3. **Test it** by searching for a book or author
+
+### Option 2: Use Local Metadata Service
+
+If you prefer to use the local metadata service:
+
+#### Step 1: Start the Metadata Service
 
 Choose one of these options:
 
-#### Option A: Docker (Recommended)
+##### Option A: Docker (Recommended)
 ```bash
 cd metadata_service
 docker-compose up -d
 ```
 
-#### Option B: Python Script
+##### Option B: Python Script
 ```bash
 cd metadata_service
 chmod +x start.sh
@@ -23,7 +35,7 @@ chmod +x start.sh
 
 The service will be available at `http://localhost:8787`
 
-### Step 2: Configure Readarr
+#### Step 2: Configure Readarr
 
 1. **Open Readarr** in your browser
 2. **Navigate to Development Settings**:
@@ -108,12 +120,15 @@ The service limits requests to 10 per minute to be respectful to Goodreads.
 ✅ **Cover Images**: High-quality book covers  
 ✅ **Import Lists**: Goodreads shelves and lists  
 ✅ **Caching**: Reduced load on Goodreads  
+✅ **Multi-Source Support**: rreading-glasses + local scraper  
+✅ **Fallback System**: Automatic provider switching  
+✅ **Confidence Scoring**: Better result quality  
 
 ## ⚠️ Current Limitations
 
 - **Series Information**: Limited series detection
 - **Author Biographies**: Basic author info only
-- **Rate Limits**: 10 requests per minute
+- **Rate Limits**: 10 requests per minute (local service)
 - **Goodreads Dependency**: Still relies on Goodreads being available
 
 ## 🔄 Alternative Solutions
@@ -124,6 +139,7 @@ If this solution doesn't work for you:
 ```
 Metadata Provider Source: https://api.bookinfo.pro
 ```
+*This is now the default and should work automatically*
 
 ### Option 2: Use Open Library (Free but limited)
 ```
@@ -234,5 +250,20 @@ You'll know it's working when:
 - ✅ Import lists sync successfully  
 - ✅ New books have proper metadata and covers
 - ✅ No more "metadata source unavailable" errors
+- ✅ Multiple metadata sources provide redundancy
 
-This should get your Readarr instance back to full functionality with minimal setup!
+## 🚀 What's New in This Version
+
+### Enhanced Metadata System
+- **Multi-Source Architecture**: Support for multiple metadata providers
+- **Automatic Fallback**: If one provider fails, automatically tries others
+- **Confidence Scoring**: Better result quality through intelligent ranking
+- **rreading-glasses Integration**: Now the default metadata source
+- **Improved Caching**: Better performance and reduced API calls
+
+### Better Error Handling
+- **Graceful Degradation**: System continues working even if some providers fail
+- **Detailed Logging**: Better debugging information
+- **Retry Logic**: Automatic retries with exponential backoff
+
+This should get your Readarr instance back to full functionality with improved reliability and performance!

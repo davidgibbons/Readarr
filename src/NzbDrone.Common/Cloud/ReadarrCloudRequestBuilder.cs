@@ -16,7 +16,9 @@ namespace NzbDrone.Common.Cloud
             Services = new HttpRequestBuilder("https://readarr.servarr.com/v1/")
                 .CreateFactory();
 
-            Metadata = new HttpRequestBuilder("https://api.bookinfo.club/v1/{route}")
+            // Updated to use rreading-glasses service (api.bookinfo.pro) as the default metadata source
+            // This provides a working alternative to the broken bookinfo.club service
+            Metadata = new HttpRequestBuilder("https://api.bookinfo.pro/v1/{route}")
                 .CreateFactory();
         }
 

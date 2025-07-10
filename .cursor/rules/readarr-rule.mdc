@@ -1,0 +1,298 @@
+---
+alwaysApply: true
+---
+
+# Readarr Development Rules
+
+## Project Overview
+This is a revival project for Readarr, focusing on fixing the broken metadata system and implementing a multi-source architecture. The project follows the phases outlined in readarr_revival_plan.md and maintains compatibility with the quick fix solution in READARR_QUICK_FIX.md.
+
+## Development Workflow
+
+### Step Tracking
+- **ALWAYS** provide step number and estimated total steps for each task
+- **ALWAYS** estimate completion time based on 2 steps per 30 seconds
+- **ALWAYS** update README.md with Excel tracking for completed steps
+- **ALWAYS** review READARR_QUICK_FIX.md and readarr_revival_plan.md before starting new work
+
+### Code Quality Standards
+- Follow existing C# coding patterns in the codebase
+- Maintain backward compatibility with existing installations
+- Use async/await patterns for all I/O operations
+- Implement proper error handling and logging
+- Add comprehensive unit tests for new functionality
+
+## Metadata System Development
+
+### Phase 1: Immediate Revival (Current Focus)
+1. **Web Scraping Infrastructure**
+   - Implement rate-limited scrapers for Goodreads, Open Library, Google Books
+   - Add proxy rotation and user-agent management
+   - Implement caching layer to reduce API calls
+   - Create `MetadataSource.WebScraping` namespace
+
+2. **rreading-glasses Integration**
+   - Integrate with api.bookinfo.pro service
+   - Update `MetadataRequestBuilder.cs` for alternative endpoints
+   - Add configuration option for metadata provider source
+   - Test compatibility with existing libraries
+
+3. **Metadata Fallback System**
+   - Modify `BookInfoProxy.cs` for multiple providers
+   - Implement priority-based fallback logic
+   - Add metadata confidence scoring
+   - Create unified response format
+
+### Phase 2: Enhanced Metadata System
+1. **Central Metadata Database**
+   - Design PostgreSQL schema for metadata storage
+   - Implement data migration strategies
+   - Add confidence scoring and source tracking
+
+2. **Machine Learning Integration**
+   - String similarity algorithms for matching
+   - Duplicate detection and merging
+   - Series detection and organization
+
+### Phase 3: Advanced Features
+1. **Enhanced Search and Discovery**
+2. **Real-time Metadata Updates**
+3. **Publisher Integration**
+
+## File Structure Guidelines
+
+### C# Backend
+- Follow existing namespace structure in `src/NzbDrone.Core/`
+- New metadata providers go in `src/NzbDrone.Core/MetadataSource/`
+- Web scraping components in `src/NzbDrone.Core/MetadataSource/WebScraping/`
+- Database models in `src/NzbDrone.Core/Datastore/`
+
+### Frontend (React)
+- Follow existing component structure in `frontend/src/`
+- New metadata-related components in `frontend/src/Settings/`
+- Maintain existing UI patterns and styling
+
+### Python Services
+- Metadata service in `metadata_service/`
+- Follow FastAPI patterns for API endpoints
+- Implement proper rate limiting and caching
+
+## Database Guidelines
+
+### Migration Strategy
+- Always create migration scripts for schema changes
+- Test migrations on sample data before production
+- Maintain backward compatibility with existing databases
+- Add proper indexes for performance
+
+### Schema Design
+```sql
+-- Core metadata tables (Phase 2)
+CREATE TABLE metadata_books (
+    id SERIAL PRIMARY KEY,
+    goodreads_id VARCHAR(50),
+    isbn13 VARCHAR(13),
+    isbn10 VARCHAR(10),
+    title VARCHAR(500),
+    subtitle VARCHAR(500),
+    description TEXT,
+    publication_date DATE,
+    page_count INTEGER,
+    language VARCHAR(10),
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP,
+    confidence_score DECIMAL(3,2)
+);
+```
+
+## Testing Requirements
+
+### Unit Tests
+- Minimum 80% code coverage for new functionality
+- Test all metadata provider integrations
+- Mock external API calls in tests
+- Test error handling and fallback scenarios
+
+### Integration Tests
+- Test metadata aggregation logic
+- Verify database migrations
+- Test end-to-end metadata flow
+- Validate caching behavior
+
+### Performance Tests
+- Test rate limiting compliance
+- Verify caching effectiveness
+- Monitor memory usage
+- Test concurrent request handling
+
+## Documentation Standards
+
+### Code Documentation
+- XML documentation for all public APIs
+- Inline comments for complex logic
+- README files for new components
+- API documentation for new endpoints
+
+### User Documentation
+- Update READARR_QUICK_FIX.md with new solutions
+- Document configuration changes
+- Provide troubleshooting guides
+- Create migration guides for users
+
+## Configuration Management
+
+### Development Settings
+- Use environment variables for sensitive data
+- Implement configuration validation
+- Provide sensible defaults
+- Support both Docker and native deployments
+
+### Metadata Provider Configuration
+```json
+{
+  "metadataProviders": [
+    {
+      "name": "rreading-glasses",
+      "url": "https://api.bookinfo.pro",
+      "priority": 1,
+      "enabled": true
+    },
+    {
+      "name": "goodreads-scraper",
+      "url": "http://localhost:8787",
+      "priority": 2,
+      "enabled": true
+    }
+  ]
+}
+```
+
+## Error Handling
+
+### Graceful Degradation
+- Implement fallback providers when primary fails
+- Cache successful results to reduce dependency
+- Provide meaningful error messages to users
+- Log detailed errors for debugging
+
+### Rate Limiting
+- Respect external API rate limits
+- Implement exponential backoff for retries
+- Use distributed caching to reduce API calls
+- Monitor and alert on rate limit violations
+
+## Security Considerations
+
+### Web Scraping
+- Respect robots.txt files
+- Implement proper user-agent strings
+- Use proxy rotation when necessary
+- Monitor for IP blocking
+
+### Data Protection
+- Encrypt sensitive configuration data
+- Implement proper authentication for APIs
+- Validate all input data
+- Sanitize output data
+
+## Performance Optimization
+
+### Caching Strategy
+- Redis for distributed caching
+- In-memory caching for frequently accessed data
+- Database caching for metadata results
+- CDN for cover images
+
+### Database Optimization
+- Proper indexing for search queries
+- Connection pooling
+- Query optimization
+- Regular maintenance tasks
+
+## Monitoring and Logging
+
+### Application Monitoring
+- Health check endpoints
+- Performance metrics collection
+- Error rate monitoring
+- User activity tracking
+
+### Logging Standards
+- Structured logging with correlation IDs
+- Different log levels for different environments
+- Log rotation and retention policies
+- Centralized log aggregation
+
+## Deployment Guidelines
+
+### Docker Support
+- Maintain existing Docker configurations
+- Add health checks to containers
+- Use multi-stage builds for optimization
+- Provide docker-compose examples
+
+### Native Deployment
+- Support Windows, Linux, and macOS
+- Provide installation scripts
+- Document system requirements
+- Create service files for systemd
+
+## Community Engagement
+
+### User Communication
+- Update progress in README.md
+- Provide migration guides
+- Respond to user feedback
+- Document breaking changes
+
+### Contribution Guidelines
+- Clear contribution guidelines
+- Code review process
+- Testing requirements for contributions
+- Documentation requirements
+
+## Success Metrics
+
+### Phase 1 Success Criteria
+- [ ] 95% of existing books can be matched with new metadata system
+- [ ] Search functionality restored for new books/authors
+- [ ] Import lists working with at least 2 sources
+- [ ] No data corruption in existing libraries
+
+### Long-term Success Criteria
+- [ ] 99.5% uptime for metadata services
+- [ ] <2 second average response time for metadata queries
+- [ ] 90% user satisfaction with search results
+- [ ] Active community contributing metadata improvements
+
+## Emergency Procedures
+
+### Rollback Strategy
+- Database backup before major changes
+- Feature flags for new functionality
+- Quick rollback procedures
+- User notification system
+
+### Critical Issues
+- Immediate response to data corruption
+- Emergency hotfix procedures
+- User communication protocols
+- Recovery time objectives
+
+## Resource Management
+
+### Development Resources
+- Track development time and costs
+- Monitor infrastructure usage
+- Plan for scaling requirements
+- Budget for third-party services
+
+### Maintenance Overhead
+- Minimize ongoing maintenance requirements
+- Automate routine tasks
+- Plan for long-term sustainability
+- Document operational procedures
+
+Remember: Always prioritize user experience and data integrity. The goal is to restore Readarr functionality while building a more robust and sustainable system for the future.
+alwaysApply: false
+---

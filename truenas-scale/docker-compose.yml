@@ -1,0 +1,112 @@
+version: '3.8'
+
+services:
+  readarr-revival:
+    image: readarr-revival:latest
+    container_name: readarr-revival
+    restart: unless-stopped
+    ports:
+      - "8787:8787"  # Main web interface
+      - "8788:8788"  # Webhook port
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=readarr_revival
+      - POSTGRES_USER=readarr
+      - POSTGRES_PASSWORD=readarr_password
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=redis_password
+      - NODE_ENV=production
+      - ASPNETCORE_ENVIRONMENT=Production
+    volumes:
+      - readarr_data:/app/data
+      - readarr_config:/app/config
+      - readarr_logs:/app/logs
+      - /mnt/pool/media/books:/books:ro  # Mount your book library (read-only)
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - readarr-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8787/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.readarr.rule=Host(`readarr-revival.local`)"
+      - "traefik.http.services.readarr.loadbalancer.server.port=8787"
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: readarr-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=readarr_revival
+      - POSTGRES_USER=readarr
+      - POSTGRES_PASSWORD=readarr_password
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --lc-collate=C --lc-ctype=C
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d:ro
+    networks:
+      - readarr-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U readarr -d readarr_revival"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  redis:
+    image: redis:7-alpine
+    container_name: readarr-redis
+    restart: unless-stopped
+    command: redis-server --requirepass redis_password
+    volumes:
+      - redis_data:/data
+    networks:
+      - readarr-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Optional: Nginx reverse proxy for SSL termination
+  nginx:
+    image: nginx:alpine
+    container_name: readarr-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - readarr-revival
+    networks:
+      - readarr-network
+    labels:
+      - "traefik.enable=false"  # Disable traefik if using nginx
+
+volumes:
+  readarr_data:
+    driver: local
+  readarr_config:
+    driver: local
+  readarr_logs:
+    driver: local
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  readarr-network:
+    driver: bridge 
