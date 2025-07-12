@@ -27,8 +27,11 @@ jobs:
           fetch-depth: 0
           
           fetch-tags: true
-      - name: Fetch all branches
+      - name: Ensure only current repo tags are used
         run: |
+          git remote set-url origin "https://github.com/${{ github.repository }}.git"
+          git remote remove upstream || true  # just in case it exists
+          git fetch --tags --force --prune --unshallow
           git fetch origin +refs/heads/*:refs/remotes/origin/*
 
       - name: Setup Node.js
