@@ -60,6 +60,10 @@ dotnet run --project src/NzbDrone.Host/Readarr.Host.csproj
 3. Follow the setup wizard
 4. Launch Readarr from the Start Menu
 
+### Option 4: Use the released Docker container
+1.) docker run -i -t ghcr.io/davidgibbons/Readarr:latest 
+
+
 ## ⚙️ Configuration
 
 ### Initial Setup
