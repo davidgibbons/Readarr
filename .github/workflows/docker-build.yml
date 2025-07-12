@@ -43,8 +43,6 @@ jobs:
         uses: cycjimmy/semantic-release-action@v4
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          repository_url: ${{ github.repository }}
 
       - name: Get full Git tag
         id: git_tag
