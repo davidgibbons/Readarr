@@ -44,7 +44,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          repositoryUrl: ${{ github.repository }}
+          repository_url: ${{ github.repository }}
 
       - name: Get full Git tag
         id: git_tag
